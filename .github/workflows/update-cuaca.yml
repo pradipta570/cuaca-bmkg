@@ -35,6 +35,10 @@ jobs:
           cp cuaca.txt pages/
           cd pages
           git add cuaca.txt
-          # Jika ada perubahan, commit dan push. Kalau tidak ada, skip tanpa error
-          git diff --cached --quiet || (git commit -m "Update cuaca.txt otomatis" && git push origin main)
-
+          # Hanya commit & push jika ada perubahan
+          if ! git diff --cached --quiet; then
+            git commit -m "Update cuaca.txt otomatis"
+            git push
+          else
+            echo "Tidak ada perubahan pada cuaca.txt, skip commit."
+          fi
