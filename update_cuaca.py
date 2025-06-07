@@ -1,31 +1,33 @@
 import requests
 
-# Ganti dengan kode wilayah adm4 yang benar untuk Kedungtuban, Blora
 kode_wilayah = "33.16.04.2016"
-
 url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
 
-def fetch_cuaca_bmkg_api():
+def fetch_cuaca():
     try:
         response = requests.get(url)
-        response.raise_for_status()
+        response.raise_for_status()  # cek respons sukses
         data = response.json()
 
-        # Contoh print data cuaca (sesuaikan dengan struktur JSON yang diterima)
-        print("Data cuaca dari API BMKG:")
-        print(data)
-
-        # Misal ambil prakiraan hari ini dan besok
+        # Contoh ambil data prakiraan cuaca hari ini dan besok
         prakiraan = data.get("data", {}).get("prakiraan", [])
-        for hari in prakiraan[:2]:
-            tanggal = hari.get("tanggal")
-            cuaca = hari.get("cuaca")
-            suhu_min = hari.get("suhu_min")
-            suhu_max = hari.get("suhu_max")
-            print(f"{tanggal}: Cuaca {cuaca}, suhu {suhu_min}°C - {suhu_max}°C")
+        
+        if not prakiraan:
+            print("Data prakiraan kosong")
+            return
+        
+        # Simpan ke file cuaca.txt dengan format sederhana
+        with open("cuaca.txt", "w", encoding="utf-8") as f:
+            for hari in prakiraan[:2]:  # hari ini dan besok
+                tanggal = hari.get("tanggal", "N/A")
+                cuaca = hari.get("cuaca", "N/A")
+                suhu_min = hari.get("suhu_min", "N/A")
+                suhu_max = hari.get("suhu_max", "N/A")
+                f.write(f"{tanggal}: {cuaca}, suhu {suhu_min} - {suhu_max} °C\n")
+        print("Update cuaca berhasil")
 
     except Exception as e:
-        print("Gagal ambil data dari API BMKG:", e)
+        print("Gagal ambil cuaca:", e)
 
 if __name__ == "__main__":
-    fetch_cuaca_bmkg_api()
+    fetch_cuaca()
