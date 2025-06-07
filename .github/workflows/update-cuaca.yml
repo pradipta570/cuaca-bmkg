@@ -24,6 +24,10 @@ jobs:
       - name: Jalankan skrip Python untuk update cuaca.txt
         run: python update_cuaca.py
 
+      - name: Cek isi folder setelah python run
+        run: ls -l
+
+
       - name: Clone repo GitHub Pages
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
