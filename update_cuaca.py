@@ -1,6 +1,5 @@
 import requests
 from datetime import datetime
-import os
 
 API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"  # Ganti dengan API key kamu
 LOCATION_KEY = "203001"  # Kedungtuban, Blora
@@ -15,9 +14,8 @@ def ambil_prakiraan():
         data_today = res_today.json()
         hari_ini = data_today['DailyForecasts'][0]
         tanggal1 = datetime.strptime(hari_ini['Date'][:10], "%Y-%m-%d").strftime("%d/%m")
-        cuaca1 = hari_ini['Day']['IconPhrase']
-        suhu_min1 = int(hari_ini['Temperature']['Minimum']['Value'])
-        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])
+        cuaca1 = hari_ini['Day']['IconPhrase']  # Cuaca hari ini
+        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])  # Suhu maksimum hari ini
 
         # Prakiraan 2 hari ke depan (besok)
         url_5day = f"{BASE_URL}/forecasts/v1/daily/5day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
@@ -26,14 +24,17 @@ def ambil_prakiraan():
         data_5day = res_5day.json()
         hari_besok = data_5day['DailyForecasts'][1]
         tanggal2 = datetime.strptime(hari_besok['Date'][:10], "%Y-%m-%d").strftime("%d/%m")
-        cuaca2 = hari_besok['Day']['IconPhrase']
-        suhu_min2 = int(hari_besok['Temperature']['Minimum']['Value'])
-        suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])
+        cuaca2 = hari_besok['Day']['IconPhrase']  # Cuaca besok
+        suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])  # Suhu maksimum besok
 
-        # Simpan ke cuaca.txt
+        # Format cuaca sesuai yang diinginkan
+        cuaca_hari_ini = f"Hari ini: {cuaca1} {suhu_max1} C"
+        cuaca_besok = f"Besok: {cuaca2} {suhu_max2} C"
+
+        # Simpan cuaca ke cuaca.txt
         with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write(f"{tanggal1}: {cuaca1}, suhu {suhu_min1}-{suhu_max1} C\n")
-            f.write(f"{tanggal2}: {cuaca2}, suhu {suhu_min2}-{suhu_max2} C\n")
+            f.write(f"{cuaca_hari_ini}\n")
+            f.write(f"{cuaca_besok}\n")
         print("✅ cuaca.txt berhasil diperbarui.")
         return True
 
