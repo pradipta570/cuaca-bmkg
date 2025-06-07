@@ -1,10 +1,12 @@
 import requests
-from datetime import datetime, timedelta
+import os
 
 kode_wilayah = "33.16.04.2016"
 url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
+
 headers = {
-    "User-Agent": "Mozilla/5.0"
+    "User-Agent": "Mozilla/5.0",
+    "Authorization": f"Bearer {os.environ.get('BMKG_API_KEY')}"
 }
 
 def fetch_cuaca():
@@ -13,42 +15,26 @@ def fetch_cuaca():
         response.raise_for_status()
         data = response.json()
 
-        forecast = data.get("data", {}).get("forecast", [])
-        if not forecast:
-            print("Data forecast kosong")
-            return False
-
-        # Ambil tanggal hari ini dan besok dalam format YYYY-MM-DD
-        today = datetime.now().date()
-        besok = today + timedelta(days=1)
-        target_tanggal = {str(today), str(besok)}
-
-        hasil = []
-        for item in forecast:
-            waktu_str = item.get("local_datetime", "")
-            if not waktu_str:
-                continue
-
-            tanggal = waktu_str.split(" ")[0]
-            if tanggal in target_tanggal:
-                waktu = waktu_str
-                suhu = item.get("t", "N/A")
-                kelembapan = item.get("hu", "N/A")
-                cuaca = item.get("weather_desc", "N/A")
-                hasil.append(f"{waktu}: {cuaca}, suhu {suhu}°C, kelembapan {kelembapan}%")
-
-        if not hasil:
-            print("Tidak ada data cuaca untuk hari ini dan besok.")
+        prakiraan = data.get("data", {}).get("prakiraan", [])
+        if not prakiraan:
+            print("Data prakiraan kosong")
             return False
 
         with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write("\n".join(hasil))
-
+            for hari in prakiraan[:2]:  # hari ini dan besok
+                tanggal = hari.get("tanggal", "N/A")
+                cuaca = hari.get("cuaca", "N/A")
+                suhu_min = hari.get("suhu_min", "N/A")
+                suhu_max = hari.get("suhu_max", "N/A")
+                f.write(f"{tanggal}: {cuaca}, suhu {suhu_min} - {suhu_max} °C\n")
         print("File cuaca.txt berhasil dibuat.")
         return True
 
     except Exception as e:
         print("Gagal ambil cuaca:", e)
+        if 'response' in locals():
+            print("Status:", response.status_code)
+            print("Response:", response.text[:500])
         return False
 
 if __name__ == "__main__":
