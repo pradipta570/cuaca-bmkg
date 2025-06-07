@@ -2,7 +2,7 @@ name: Update Cuaca BMKG (JSON)
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # jalan tiap 3 jam
+    - cron: '0 */3 * * *'  # tiap 3 jam
   workflow_dispatch:
 
 jobs:
@@ -21,21 +21,23 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Jalankan skrip Python
+      - name: Jalankan skrip Python untuk update cuaca.txt
         run: python update_cuaca.py
 
       - name: Clone repo GitHub Pages
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/pradipta570/pradipta570.github.io.git pages
+          git clone https://x-access-token:${GH_TOKEN}@github.com/pradipta570/pradipta570.github.io.git pages
 
-      - name: Salin cuaca.txt ke repo GitHub Pages dan commit jika ada perubahan
+      - name: Copy dan commit update cuaca.txt jika ada perubahan
         run: |
           cp cuaca.txt pages/
           cd pages
           git add cuaca.txt
-          # commit hanya jika ada perubahan
+          # Commit dan push hanya jika ada perubahan
           if ! git diff --cached --quiet; then
             git commit -m "Update cuaca.txt otomatis"
             git push
