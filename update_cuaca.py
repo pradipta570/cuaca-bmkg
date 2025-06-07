@@ -1,49 +1,45 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
+import os
 
-API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"
-LOCATION_KEY = "203001"
+API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"  # Ganti dengan API key kamu
+LOCATION_KEY = "203001"  # Kedungtuban, Blora
 BASE_URL = "http://dataservice.accuweather.com"
 
-def get_today_weather(api_key, location_key):
-    url = f"{BASE_URL}/currentconditions/v1/{location_key}?apikey={api_key}&language=id-ID&details=true"
+def ambil_prakiraan():
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        if data:
-            kondisi = data[0]["WeatherText"]
-            suhu = data[0]["Temperature"]["Metric"]["Value"]
-            return f"Hari ini: {kondisi} {suhu}°C"
-    except Exception as e:
-        print("Gagal ambil cuaca hari ini:", e)
-    return "Hari ini: N/A"
+        # Prakiraan 1 hari ke depan (hari ini)
+        url_today = f"{BASE_URL}/forecasts/v1/daily/1day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
+        res_today = requests.get(url_today)
+        res_today.raise_for_status()
+        data_today = res_today.json()
+        hari_ini = data_today['DailyForecasts'][0]
+        tanggal1 = datetime.strptime(hari_ini['Date'][:10], "%Y-%m-%d").strftime("%d/%m")
+        cuaca1 = hari_ini['Day']['IconPhrase']
+        suhu_min1 = int(hari_ini['Temperature']['Minimum']['Value'])
+        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])
 
-def get_tomorrow_forecast(api_key, location_key):
-    url = f"{BASE_URL}/forecasts/v1/daily/5day/{location_key}?apikey={api_key}&language=id-ID&metric=true"
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        if "DailyForecasts" in data and len(data["DailyForecasts"]) >= 2:
-            besok = data["DailyForecasts"][1]
-            kondisi = besok["Day"]["IconPhrase"]
-            suhu = besok["Temperature"]["Maximum"]["Value"]
-            return f"Besok: {kondisi} {suhu}°C"
-    except Exception as e:
-        print("Gagal ambil prakiraan besok:", e)
-    return "Besok: N/A"
+        # Prakiraan 2 hari ke depan (besok)
+        url_5day = f"{BASE_URL}/forecasts/v1/daily/5day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
+        res_5day = requests.get(url_5day)
+        res_5day.raise_for_status()
+        data_5day = res_5day.json()
+        hari_besok = data_5day['DailyForecasts'][1]
+        tanggal2 = datetime.strptime(hari_besok['Date'][:10], "%Y-%m-%d").strftime("%d/%m")
+        cuaca2 = hari_besok['Day']['IconPhrase']
+        suhu_min2 = int(hari_besok['Temperature']['Minimum']['Value'])
+        suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])
 
-def simpan_ke_file(teks1, teks2):
-    try:
+        # Simpan ke cuaca.txt
         with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write(teks1 + "\n")
-            f.write(teks2 + "\n")
-        print("cuaca.txt berhasil diperbarui.")
+            f.write(f"{tanggal1}: {cuaca1}, suhu {suhu_min1}-{suhu_max1} C\n")
+            f.write(f"{tanggal2}: {cuaca2}, suhu {suhu_min2}-{suhu_max2} C\n")
+        print("✅ cuaca.txt berhasil diperbarui.")
+        return True
+
     except Exception as e:
-        print("Gagal simpan file:", e)
+        print("❌ Gagal ambil cuaca:", e)
+        return False
 
 if __name__ == "__main__":
-    cuaca_hari_ini = get_today_weather(API_KEY, LOCATION_KEY)
-    cuaca_besok = get_tomorrow_forecast(API_KEY, LOCATION_KEY)
-    simpan_ke_file(cuaca_hari_ini, cuaca_besok)
+    ambil_prakiraan()
