@@ -5,7 +5,7 @@ from datetime import datetime
 def fetch_cuaca():
     try:
         # URL data cuaca BMKG (contoh JSON wilayah Jawa Tengah)
-        url = https://data.bmkg.go.id/DataMKG/MEWS/DigitalForecast/DigitalForecast-Jawa_Tengah.xml
+        url = "https://data.bmkg.go.id/DataMKG/MEWS/DigitalForecast/DigitalForecast-Jawa_Tengah.xml"
 
         response = requests.get(url)
         response.raise_for_status()
