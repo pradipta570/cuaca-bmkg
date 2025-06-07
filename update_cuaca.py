@@ -7,8 +7,10 @@ def fetch_cuaca():
     try:
         response = requests.get(url)
         response.raise_for_status()
-
-        print("Response text:", response.text)  # debug cek isi response
+        
+        # Tambahkan ini untuk melihat isi response mentah
+        print("Isi response dari API BMKG:")
+        print(response.text)
 
         data = response.json()
         prakiraan = data.get("data", {}).get("prakiraan", [])
