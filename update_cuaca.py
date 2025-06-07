@@ -1,5 +1,4 @@
 import requests
-import os
 
 kode_wilayah = "33.16.04.2016"
 url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
@@ -8,8 +7,10 @@ def fetch_cuaca():
     try:
         response = requests.get(url)
         response.raise_for_status()
-        data = response.json()
 
+        print("Response text:", response.text)  # debug cek isi response
+
+        data = response.json()
         prakiraan = data.get("data", {}).get("prakiraan", [])
         if not prakiraan:
             print("Data prakiraan kosong")
