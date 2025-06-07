@@ -6,13 +6,12 @@ url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
 def fetch_cuaca():
     try:
         response = requests.get(url)
-        response.raise_for_status()
-        
-        # Tambahkan ini untuk melihat isi response mentah
-        print("Isi response dari API BMKG:")
-        print(response.text)
+        print("=== RESPONSE TEXT DARI BMKG ===")
+        print(response.text)  # <--- Tambahkan ini untuk debugging
 
+        response.raise_for_status()
         data = response.json()
+
         prakiraan = data.get("data", {}).get("prakiraan", [])
         if not prakiraan:
             print("Data prakiraan kosong")
