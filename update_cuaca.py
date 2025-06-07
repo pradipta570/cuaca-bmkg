@@ -1,29 +1,49 @@
 import requests
+from datetime import datetime, timedelta
 
 kode_wilayah = "33.16.04.2016"
 url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
+headers = {
+    "User-Agent": "Mozilla/5.0"
+}
 
 def fetch_cuaca():
     try:
-        response = requests.get(url)
-        print("=== RESPONSE TEXT DARI BMKG ===")
-        print(response.text)  # <--- Tambahkan ini untuk debugging
-
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         data = response.json()
 
-        prakiraan = data.get("data", {}).get("prakiraan", [])
-        if not prakiraan:
-            print("Data prakiraan kosong")
+        forecast = data.get("data", {}).get("forecast", [])
+        if not forecast:
+            print("Data forecast kosong")
+            return False
+
+        # Ambil tanggal hari ini dan besok dalam format YYYY-MM-DD
+        today = datetime.now().date()
+        besok = today + timedelta(days=1)
+        target_tanggal = {str(today), str(besok)}
+
+        hasil = []
+        for item in forecast:
+            waktu_str = item.get("local_datetime", "")
+            if not waktu_str:
+                continue
+
+            tanggal = waktu_str.split(" ")[0]
+            if tanggal in target_tanggal:
+                waktu = waktu_str
+                suhu = item.get("t", "N/A")
+                kelembapan = item.get("hu", "N/A")
+                cuaca = item.get("weather_desc", "N/A")
+                hasil.append(f"{waktu}: {cuaca}, suhu {suhu}°C, kelembapan {kelembapan}%")
+
+        if not hasil:
+            print("Tidak ada data cuaca untuk hari ini dan besok.")
             return False
 
         with open("cuaca.txt", "w", encoding="utf-8") as f:
-            for hari in prakiraan[:2]:  # hari ini dan besok
-                tanggal = hari.get("tanggal", "N/A")
-                cuaca = hari.get("cuaca", "N/A")
-                suhu_min = hari.get("suhu_min", "N/A")
-                suhu_max = hari.get("suhu_max", "N/A")
-                f.write(f"{tanggal}: {cuaca}, suhu {suhu_min} - {suhu_max} °C\n")
+            f.write("\n".join(hasil))
+
         print("File cuaca.txt berhasil dibuat.")
         return True
 
