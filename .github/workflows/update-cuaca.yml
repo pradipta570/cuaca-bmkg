@@ -30,10 +30,11 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/pradipta570/pradipta570.github.io.git pages
 
-      - name: Salin cuaca.txt ke repo GitHub Pages dan commit jika ada perubahan
-        run: |
-          cp cuaca.txt pages/
-          cd pages
-          git add cuaca.txt
-          git diff --cached --quiet || git commit -m "Update cuaca.txt otomatis"
-          git push origin main
+    - name: Salin cuaca.txt ke repo GitHub Pages dan commit jika ada perubahan
+    run: |
+    cp cuaca.txt pages/
+    cd pages
+    git add cuaca.txt
+    # Jika ada perubahan, commit dan push, kalau tidak ada skip tanpa error
+    git diff --cached --quiet || (git commit -m "Update cuaca.txt otomatis" && git push origin main)
+
