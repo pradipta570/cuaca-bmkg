@@ -2,7 +2,7 @@ name: Update Cuaca BMKG (JSON)
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: '0 */3 * * *'  # jalan tiap 3 jam
   workflow_dispatch:
 
 jobs:
@@ -10,18 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo cuaca-bmkg
+        uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install requests
+      - name: Install dependencies
         run: pip install requests
 
       - name: Jalankan skrip Python
-        run: python update_cuaca_json.py
+        run: python update_cuaca.py
 
       - name: Clone repo GitHub Pages
         run: |
@@ -29,10 +30,10 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/pradipta570/pradipta570.github.io.git pages
 
-      - name: Salin cuaca.txt ke repo GitHub Pages
+      - name: Salin cuaca.txt ke repo GitHub Pages dan commit jika ada perubahan
         run: |
           cp cuaca.txt pages/
           cd pages
           git add cuaca.txt
-          git commit -m "Update cuaca.txt otomatis"
-          git push
+          git diff --cached --quiet || git commit -m "Update cuaca.txt otomatis"
+          git push origin main
