@@ -1,4 +1,5 @@
 import requests
+import os
 
 kode_wilayah = "33.16.04.2016"
 url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
@@ -6,17 +7,14 @@ url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
 def fetch_cuaca():
     try:
         response = requests.get(url)
-        response.raise_for_status()  # cek respons sukses
+        response.raise_for_status()
         data = response.json()
 
-        # Contoh ambil data prakiraan cuaca hari ini dan besok
         prakiraan = data.get("data", {}).get("prakiraan", [])
-        
         if not prakiraan:
             print("Data prakiraan kosong")
-            return
-        
-        # Simpan ke file cuaca.txt dengan format sederhana
+            return False
+
         with open("cuaca.txt", "w", encoding="utf-8") as f:
             for hari in prakiraan[:2]:  # hari ini dan besok
                 tanggal = hari.get("tanggal", "N/A")
@@ -24,10 +22,12 @@ def fetch_cuaca():
                 suhu_min = hari.get("suhu_min", "N/A")
                 suhu_max = hari.get("suhu_max", "N/A")
                 f.write(f"{tanggal}: {cuaca}, suhu {suhu_min} - {suhu_max} °C\n")
-        print("Update cuaca berhasil")
+        print("File cuaca.txt berhasil dibuat.")
+        return True
 
     except Exception as e:
         print("Gagal ambil cuaca:", e)
+        return False
 
 if __name__ == "__main__":
     fetch_cuaca()
