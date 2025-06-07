@@ -1,40 +1,31 @@
 import requests
-import datetime
 
-# URL file JSON cuaca resmi BMKG untuk Kab. Blora
-URL = "https://raw.githubusercontent.com/infoBMKG/data-cuaca/main/cuaca/kab-blora.json"
+# Ganti dengan kode wilayah adm4 yang benar untuk Kedungtuban, Blora
+kode_wilayah = "33.16.04.2016"
 
-def fetch_cuaca():
+url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
+
+def fetch_cuaca_bmkg_api():
     try:
-        response = requests.get(URL)
+        response = requests.get(url)
         response.raise_for_status()
         data = response.json()
+
+        # Contoh print data cuaca (sesuaikan dengan struktur JSON yang diterima)
+        print("Data cuaca dari API BMKG:")
+        print(data)
+
+        # Misal ambil prakiraan hari ini dan besok
+        prakiraan = data.get("data", {}).get("prakiraan", [])
+        for hari in prakiraan[:2]:
+            tanggal = hari.get("tanggal")
+            cuaca = hari.get("cuaca")
+            suhu_min = hari.get("suhu_min")
+            suhu_max = hari.get("suhu_max")
+            print(f"{tanggal}: Cuaca {cuaca}, suhu {suhu_min}°C - {suhu_max}°C")
+
     except Exception as e:
-        with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write("Gagal ambil cuaca")
-        print("Gagal ambil cuaca:", e)
-        return
-
-    hasil = []
-
-    tanggal = data.get("tanggal", "")
-    kota = data.get("kota", "Blora")
-    entries = data.get("data", [])
-
-    if not entries:
-        hasil.append("Data kosong")
-    else:
-        hasil.append(f"{kota} {tanggal}")
-        for entry in entries:
-            jam = entry.get("jam", "-")
-            cuaca = entry.get("cuaca", "-")
-            suhu = entry.get("suhu", "-")
-            hasil.append(f"{jam} {cuaca} {suhu}C")
-
-    # Simpan ke cuaca.txt
-    with open("cuaca.txt", "w", encoding="utf-8") as f:
-        f.write("\n".join(hasil))
-    print("Berhasil update cuaca.txt")
+        print("Gagal ambil data dari API BMKG:", e)
 
 if __name__ == "__main__":
-    fetch_cuaca()
+    fetch_cuaca_bmkg_api()
