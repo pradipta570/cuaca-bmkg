@@ -1,60 +1,53 @@
 import requests
-import os
 
-kode_wilayah = "33.16.04.2016"
-url = f"https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={kode_wilayah}"
+API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"  # ganti dengan API key kamu
+LOCATION_NAME = "Kedungtuban"
 
-headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Authorization": f"Bearer {os.environ.get('BMKG_API_KEY')}"
-}
+def get_location_key(location_name):
+    url = f"https://dataservice.accuweather.com/locations/v1/cities/search"
+    params = {
+        "apikey": API_KEY,
+        "q": location_name
+    }
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    locations = response.json()
+    if locations:
+        return locations[0]["Key"]
+    else:
+        raise Exception("Lokasi tidak ditemukan")
 
-def fetch_cuaca():
+def get_current_weather(location_key):
+    url = f"https://dataservice.accuweather.com/currentconditions/v1/{location_key}"
+    params = {
+        "apikey": API_KEY,
+        "language": "id-ID",
+        "details": "true"
+    }
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    weather_data = response.json()
+    if weather_data:
+        return weather_data[0]
+    else:
+        raise Exception("Data cuaca tidak tersedia")
+
+def save_weather_to_file(weather):
+    with open("cuaca.txt", "w", encoding="utf-8") as f:
+        f.write(f"Tanggal & Waktu: {weather['LocalObservationDateTime']}\n")
+        f.write(f"Cuaca: {weather['WeatherText']}\n")
+        f.write(f"Suhu: {weather['Temperature']['Metric']['Value']} °C\n")
+        f.write(f"Kelembapan: {weather['RelativeHumidity']} %\n")
+        f.write(f"Kecepatan Angin: {weather['Wind']['Speed']['Metric']['Value']} km/jam\n")
+
+def main():
     try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        data = response.json()
-
-        forecast = data.get("data", {}).get("forecast", [])
-        if not forecast:
-            print("Data forecast kosong")
-            with open("cuaca.txt", "w", encoding="utf-8") as f:
-                f.write("Tidak ada data cuaca tersedia.")
-            return False
-
-        # Process forecast data
-        today = datetime.now().date()
-        besok = today + timedelta(days=1)
-        target_tanggal = {str(today), str(besok)}
-
-        hasil = []
-        for item in forecast:
-            waktu_str = item.get("local_datetime", "")
-            if not waktu_str:
-                continue
-
-            tanggal = waktu_str.split(" ")[0]
-            if tanggal in target_tanggal:
-                waktu = waktu_str
-                suhu = item.get("t", "N/A")
-                kelembapan = item.get("hu", "N/A")
-                cuaca = item.get("weather_desc", "N/A")
-                hasil.append(f"{waktu}: {cuaca}, suhu {suhu}°C, kelembapan {kelembapan}%")
-
-        if not hasil:
-            print("Tidak ada data cuaca untuk hari ini dan besok.")
-            with open("cuaca.txt", "w", encoding="utf-8") as f:
-                f.write("Data cuaca untuk hari ini dan besok tidak tersedia.")
-            return False
-
-        with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write("\n".join(hasil))
-
-        print("File cuaca.txt berhasil dibuat.")
-        return True
-
+        location_key = get_location_key(LOCATION_NAME)
+        weather = get_current_weather(location_key)
+        save_weather_to_file(weather)
+        print("Data cuaca berhasil disimpan ke cuaca.txt")
     except Exception as e:
-        print(f"Gagal ambil cuaca: {e}")
-        with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write("Gagal mengambil data cuaca: " + str(e))
-        return False
+        print("Gagal mengambil data cuaca:", e)
+
+if __name__ == "__main__":
+    main()
