@@ -14,7 +14,7 @@ def ambil_prakiraan():
         res_today.raise_for_status()
         data_today = res_today.json()
         hari_ini = data_today['DailyForecasts'][0]
-        cuaca1 = hari_ini['Day']['IconPhrase']  # Hari ini
+        cuaca1 = hari_ini['Day']['IconPhrase']  # Cuaca Hari ini
         suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])  # Suhu maksimum hari ini
 
         # Prakiraan 2 hari ke depan (besok)
@@ -23,11 +23,11 @@ def ambil_prakiraan():
         res_5day.raise_for_status()
         data_5day = res_5day.json()
         hari_besok = data_5day['DailyForecasts'][1]
-        cuaca2 = hari_besok['Day']['IconPhrase']  # Besok
+        cuaca2 = hari_besok['Day']['IconPhrase']  # Cuaca Besok
         suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])  # Suhu maksimum besok
 
         # Format data cuaca dalam satu baris sesuai permintaan
-        cuaca_data = f"Cuaca Hari Ini: {cuaca1} {suhu_max1}C, Cuaca Besok: {cuaca2} {suhu_max2}C"
+        cuaca_data = f"Hari Ini: {cuaca1} {suhu_max1}C, Besok: {cuaca2} {suhu_max2}C"
 
         # Simpan data cuaca ke cuaca.txt dalam satu baris
         with open("cuaca.txt", "w", encoding="utf-8") as f:
