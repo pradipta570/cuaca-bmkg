@@ -1,6 +1,6 @@
 import requests
-from datetime import datetime
 import json
+from datetime import datetime
 
 API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"  # Ganti dengan API key kamu
 LOCATION_KEY = "203001"  # Kedungtuban, Blora
@@ -28,8 +28,8 @@ def ambil_prakiraan():
         cuaca2 = hari_besok['Day']['IconPhrase']  # Cuaca besok
         suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])  # Suhu maksimum besok
 
-        # Format output dalam JSON
-        cuaca_json = {
+        # Format data cuaca ke JSON
+        cuaca_data = {
             "hari_ini": {
                 "tanggal": tanggal1,
                 "kondisi": cuaca1,
@@ -42,9 +42,9 @@ def ambil_prakiraan():
             }
         }
 
-        # Simpan data cuaca dalam cuaca.json
-        with open("cuaca.json", "w", encoding="utf-8") as json_file:
-            json.dump(cuaca_json, json_file, ensure_ascii=False, indent=2)  # Format JSON yang terindetasi untuk keterbacaan
+        # Simpan data cuaca ke cuaca.json
+        with open("cuaca.json", "w", encoding="utf-8") as f:
+            json.dump(cuaca_data, f, ensure_ascii=False, indent=4)
 
         print("✅ cuaca.json berhasil diperbarui.")
         return True
