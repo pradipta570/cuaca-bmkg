@@ -38,9 +38,9 @@ jobs:
 
       - name: Copy dan commit update cuaca.txt jika ada perubahan
         run: |
-          cp cuaca.json pages/
+          cp cuaca.txt pages/
           cd pages
-          git add cuaca.json
+          git add cuaca.txt
           # Commit dan push hanya jika ada perubahan
           if ! git diff --cached --quiet; then
             git commit -m "Update cuaca.txt otomatis"
