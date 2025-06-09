@@ -2,38 +2,47 @@ import requests
 import json
 from datetime import datetime
 
-API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"  # Ganti dengan API key kamu
+API_KEY = "12ReKcABuIhvdekriuJCz4FBXcU0mX7L"
 LOCATION_KEY = "203001"  # Kedungtuban, Blora
 BASE_URL = "http://dataservice.accuweather.com"
 
 def ambil_prakiraan():
     try:
-        # Prakiraan 1 hari ke depan (hari ini)
+        # Hari Ini
         url_today = f"{BASE_URL}/forecasts/v1/daily/1day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
         res_today = requests.get(url_today)
         res_today.raise_for_status()
         data_today = res_today.json()
         hari_ini = data_today['DailyForecasts'][0]
-        cuaca1 = hari_ini['Day']['IconPhrase']  # Cuaca Hari ini
-        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])  # Suhu maksimum hari ini
+        cuaca1 = hari_ini['Day']['IconPhrase']
+        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])
 
-        # Prakiraan 2 hari ke depan (besok)
+        # Besok
         url_5day = f"{BASE_URL}/forecasts/v1/daily/5day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
         res_5day = requests.get(url_5day)
         res_5day.raise_for_status()
         data_5day = res_5day.json()
         hari_besok = data_5day['DailyForecasts'][1]
-        cuaca2 = hari_besok['Day']['IconPhrase']  # Cuaca Besok
-        suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])  # Suhu maksimum besok
+        cuaca2 = hari_besok['Day']['IconPhrase']
+        suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])
 
-        # Format data cuaca dalam satu baris sesuai permintaan
-        cuaca_data = f"Hari Ini: {cuaca1} {suhu_max1}C, Besok: {cuaca2} {suhu_max2}C"
+        # Data format JSON
+        cuaca_json = {
+            "hari_ini": {
+                "kondisi": cuaca1,
+                "suhu": suhu_max1
+            },
+            "besok": {
+                "kondisi": cuaca2,
+                "suhu": suhu_max2
+            }
+        }
 
-        # Simpan data cuaca ke cuaca.txt dalam satu baris
-        with open("cuaca.txt", "w", encoding="utf-8") as f:
-            f.write(cuaca_data)
+        # Simpan sebagai cuaca.json
+        with open("cuaca.json", "w", encoding="utf-8") as f:
+            json.dump(cuaca_json, f, ensure_ascii=False, indent=2)
 
-        print("✅ cuaca.txt berhasil diperbarui.")
+        print("✅ cuaca.json berhasil diperbarui.")
         return True
 
     except Exception as e:
