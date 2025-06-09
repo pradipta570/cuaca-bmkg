@@ -1,50 +1,35 @@
-name: Update Cuaca BMKG (JSON)
+name: Update Cuaca
 
 on:
   schedule:
-    - cron: '0 */3 * * *'  # tiap 3 jam
-  workflow_dispatch:
+    - cron: '*/10 * * * *'  # tiap 10 menit
+  workflow_dispatch:       # bisa juga dijalankan manual
 
 jobs:
   update-cuaca:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo cuaca-bmkg
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
-      - name: Jalankan skrip Python untuk update cuaca.txt
-        run: python update_cuaca.py
+      - name: Jalankan script update cuaca
+        run: python cuaca.py
 
-      - name: Cek isi folder setelah python run
-        run: ls -l
-
-
-      - name: Clone repo GitHub Pages
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Commit dan push jika ada perubahan
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git clone https://x-access-token:${GH_TOKEN}@github.com/pradipta570/pradipta570.github.io.git pages
-
-      - name: Copy dan commit update cuaca.txt jika ada perubahan
-        run: |
-          cp cuaca.txt pages/
-          cd pages
-          git add cuaca.txt
-          # Commit dan push hanya jika ada perubahan
-          if ! git diff --cached --quiet; then
-            git commit -m "Update cuaca.txt otomatis"
-            git push
-          else
-            echo "Tidak ada perubahan, tidak perlu commit."
-          fi
+          git add cuaca.json
+          git commit -m "🔄 Update cuaca otomatis" || echo "No changes to commit"
+          git push
