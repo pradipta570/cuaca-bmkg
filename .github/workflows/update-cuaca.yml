@@ -23,7 +23,6 @@ jobs:
 
       - name: Jalankan skrip Python untuk update cuaca.json
         run: python update_cuaca.py
-              python rungau.py
 
       - name: Cek isi folder setelah python run
         run: ls -l
@@ -40,10 +39,8 @@ jobs:
       - name: Copy dan commit update cuaca.txt jika ada perubahan
         run: |
           cp cuaca.json pages/
-          cp rungau.json pages/
           cd pages
           git add cuaca.json
-          git add rungau.json
           # Commit dan push hanya jika ada perubahan
           if ! git diff --cached --quiet; then
             git commit -m "Update cuaca.json otomatis"
