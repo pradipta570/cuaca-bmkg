@@ -7,15 +7,16 @@ BASE_URL = "http://dataservice.accuweather.com"
 
 def ambil_prakiraan():
     try:
-        # Ambil suhu saat ini
-        url_current = f"{BASE_URL}/currentconditions/v1/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
-        res_current = requests.get(url_current)
-        res_current.raise_for_status()
-        data_current = res_current.json()
-        suhu_now = int(data_current[0]['Temperature']['Metric']['Value'])
-        cuaca_now = data_current[0]['WeatherText']
+        # Ambil data cuaca hari ini
+        url_today = f"{BASE_URL}/forecasts/v1/daily/1day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
+        res_today = requests.get(url_today)
+        res_today.raise_for_status()
+        data_today = res_today.json()
+        hari_ini = data_today['DailyForecasts'][0]
+        cuaca1 = hari_ini['Day']['IconPhrase']
+        suhu_max1 = int(hari_ini['Temperature']['Maximum']['Value'])
 
-        # Ambil cuaca besok (dari 5-day forecast)
+        # Ambil data cuaca besok
         url_5day = f"{BASE_URL}/forecasts/v1/daily/5day/{LOCATION_KEY}?apikey={API_KEY}&language=id&metric=true"
         res_5day = requests.get(url_5day)
         res_5day.raise_for_status()
@@ -24,11 +25,11 @@ def ambil_prakiraan():
         cuaca2 = hari_besok['Day']['IconPhrase']
         suhu_max2 = int(hari_besok['Temperature']['Maximum']['Value'])
 
-        # Format JSON hasil
+        # Format sebagai JSON
         data = {
             "hari_ini": {
-                "cuaca": cuaca_now,
-                "suhu": suhu_now  # pakai suhu real-time
+                "cuaca": cuaca1,
+                "suhu": suhu_max1
             },
             "besok": {
                 "cuaca": cuaca2,
