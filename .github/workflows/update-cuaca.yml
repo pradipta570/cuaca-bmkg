@@ -36,7 +36,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git clone https://x-access-token:${GH_TOKEN}@github.com/pradipta570/pradipta570.github.io.git pages
 
-      - name: Copy dan commit update cuaca.txt jika ada perubahan
+      - name: Copy dan commit update cuaca.json jika ada perubahan
         run: |
           cp cuaca.json pages/
           cd pages
