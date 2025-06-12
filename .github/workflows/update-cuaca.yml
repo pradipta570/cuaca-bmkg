@@ -1,4 +1,4 @@
-name: Update Cuaca BMKG (JSON)
+name: Update Cuaca ACCU (JSON)
 
 on:
   schedule:
